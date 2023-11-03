@@ -1,0 +1,5 @@
+{% if value|default(null) %}
+    {{ value.fullName ?? value.username }} (#{{ value.id }})
+{% else %}
+    <span><пусто></span>
+{% endif %}

@@ -1,0 +1,41 @@
+{% use 'bootstrap_4_horizontal_layout.html.twig' %}
+
+{%- block form_widget -%}
+    {{ parent() }}
+    {% if label is not same as(false) and form is not rootform -%}
+        {{- form_errors(form) -}}
+    {% endif %}
+{%- endblock -%}
+
+{%- block textarea_widget -%}
+    {{ parent() }}
+    {{- form_errors(form) -}}
+{%- endblock -%}
+
+{%- block form_label_errors -%}
+{%- endblock -%}
+
+{%- block crud_collection_widget -%}
+    {{ block('collection_widget') }}
+    {% if allow_add %}
+        <div class="input-group-append">
+            <button type="button"
+                class="btn btn-outline-secondary"
+                data-action="collection-widget-add"
+            >
+                {{ button_add.text }}
+                <i class="fas fa-plus-circle"></i>
+            </button>
+        </div>
+    {% endif %}
+{%- endblock -%}
+
+{%- block crud_collection_entry_label -%}
+    {% if form.parent.vars.allow_delete %}
+        <div class="col-sm-1">
+            <button type="button" class="btn btn-outline-secondary" data-action="collection-widget-remove">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    {% endif %}
+{%- endblock -%}

@@ -1,0 +1,15 @@
+{% if field.template|default(false) %}
+    {% if item is defined %}
+        <div class="form-group row">
+            <label class="col-form-label col-sm-2">{{ field.label|default('') }}</label>
+            <div class="col-sm-10">
+                {% include field.template with { value: attribute(item, fieldName)} %}
+            </div>
+        </div>
+    {% endif %}
+{% else %}
+    {% set child = form.children[fieldName] ?? null %}
+    {% if child %}
+        {{ form_row(form.children[fieldName]) }}
+    {% endif %}
+{% endif %}

@@ -1,0 +1,102 @@
+{# @var context \App\Utils\Crud\CrudContext #}
+{# @var config \App\Utils\Crud\CrudConfig #}
+{# @var actionConfig array #}
+{# @var currentAction string #}
+{# @var entityId mixed #}
+{# @var title string #}
+{# @var fields array #}
+{% extends 'base.html.twig' %}
+{% set entityId = entityId|default(null) %}
+{% set logEntries = logEntries|default(null) %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block title_h1 %}{{ title }}{% endblock %}
+
+{% block stylesheets %}
+    {% for stylesheet in config.stylesheets %}
+        <link rel="stylesheet" href="{{ asset(stylesheet) }}">
+    {% endfor %}
+{% endblock %}
+
+{% block buttons %}
+    {% if entityId and 'delete' in config.actions|keys %}
+        {% include('default/_delete_confirmation.html.twig') %}
+        <form action="{{ url(config.route('delete'), {id: entityId}) }}" method="post" data-confirmation="true" id="delete-form">
+            <button type="submit" class="btn btn-danger"><i class="fas fa-trash-alt mr-1"></i> Удалить запись</button>
+            <input type="hidden" name="_method" value="DELETE">
+            <input type="hidden" name="_token" value="{{ csrf_token(config.route('delete') ~ entityId) }}" />
+        </form>
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <ul class="nav nav-tabs justify-content-end mb-3" id="editTab" role="tablist">
+        {% block nav_tabs %}
+            {% for tabName, tab in config.tabs %}
+                <li class="nav-item">
+                    <a id="{{ tabName }}-tab" data-toggle="tab" href="#{{ tabName }}" class="nav-link
+                        {% if tab.active|default(false) %} active{% endif %}"
+                    >
+                        {{ tab.title }}
+                    </a>
+                </li>
+            {% endfor %}
+        {% endblock %}
+
+        {% if logEntries %}
+            <li class="nav-item">
+                <a class="nav-link" id="log-tab" data-toggle="tab" href="#log">Журнал изменений</a>
+            </li>
+        {% endif %}
+    </ul>
+
+    {% form_theme form config.formTheme %}
+
+    {{ form_start(form) }}
+        {{ form_errors(form) }}
+        <div class="tab-content" id="editTabContent">
+            {% block tab_contents %}
+                {% for tabName, tab in config.tabs %}
+                    <div id="{{ tabName }}" class="tab-pane fade show
+                        {% if tab.active|default(false) %} active{% endif %}"
+                    >
+                        {% block tab_content %}
+                            {% for fieldName, field in fields %}
+                                {% if field.tab is same as tabName %}
+                                    {% include 'default/crud/form_row.html.twig' %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endblock %}
+                    </div>
+                {% endfor %}
+            {% endblock %}
+
+            {% if logEntries %}
+                <div class="tab-pane fade" id="log">
+                    {% include('default/_log_entries.html.twig') with {
+                        'path_version': config.route('version'),
+                        'entity_id': entityId
+                    } %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-10">
+                {% block form_buttons %}
+                    <button type="submit" id="button_save" class="btn-primary btn" data-form-action="">Сохранить</button>
+                {% endblock %}
+                {% for button in config.formButtons %}
+                    <button type="submit" id="form_button_{{ button.id }}" class="{{ button.class }} btn"
+                        data-form-action="{{ button.url }}"
+                    >
+                        {{ button.title }}
+                    </button>
+                {% endfor %}
+                {% if config.formBackUrl %}
+                    <a href="{{ config.formBackUrl }}" class="btn btn-link">{{ config.formBackTitle }}</a>
+                {% endif %}
+            </div>
+        </div>
+    {{ form_end(form) }}
+{% endblock %}

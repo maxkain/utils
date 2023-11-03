@@ -1,0 +1,32 @@
+{% if value|length %}
+    <div class="tasks"{% if value|length > 10 %} data-spoiler-height="400"{% endif %}
+         xmlns="http://www.w3.org/1999/html">
+        {% for task in value %}
+            <div class="task">
+                <div class="info">
+                    <span>{{ task.scheduledDate ? task.scheduledDate|app_timezone|app_datetime : '-' }}</span>
+                    - <span>{{ task.type.title }}</span>
+                    - <span>{{ task.title }}</span>
+                    {% if task.expired %}
+                        <span class="expired">Просрочено</span>
+                    {% endif %}
+                    {% if task.completed %}
+                        <span class="completed">
+                            <span>Завершено:</span>
+                            <span>{{ task.completedDate|app_timezone|app_datetime }}</span>
+                        </span>
+                    {% endif %}
+                    <a class="edit" href="{{ path('base_task_task_edit', { id: task.id }) }}">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </div>
+                {% if task.description %}
+                    <div class="text">{{ task.description }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div class="spoiler-open">Показать все</div>
+    </div>
+{% else %}
+    {% include 'default/crud/empty.html.twig' %}
+{% endif %}

@@ -1,0 +1,70 @@
+{# @var context \App\Utils\Crud\CrudContext #}
+{# @var config \App\Utils\Crud\CrudConfig #}
+{# @var actionConfig array #}
+{# @var currentAction string #}
+{# @var title string #}
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block title_h1 %}{{ title }}{% endblock %}
+
+{% block stylesheets %}
+    {% for stylesheet in config.stylesheets %}
+        <link rel="stylesheet" href="{{ asset(stylesheet) }}">
+    {% endfor %}
+{% endblock %}
+
+{% block buttons %}
+    <a class="btn btn-success" href="{{ path(config.route('create')) }}">
+        <i class="fas fa-plus mr-1"></i>
+        {{ config.createTitle}}
+    </a>
+{% endblock %}
+
+{% block body %}
+    <div class="table-wrapper">
+        <table class="table table-hover table-striped">
+            <thead>
+            <tr>
+            {% for field in fields %}
+                <th scope="col">{{ field.label }}</th>
+            {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in items %}
+                <tr>
+                    {% for key, field in fields %}
+                        <td>
+                            {% set value = attribute(item, key) %}
+                            {% if field.template|default(null) %}
+                                {% include field.template %}
+                            {% else %}
+                                {% if value is not null %}
+                                    {% if field.view_timezone|default(false) %}
+                                        {% set value = value|app_timezone(field.view_timezone) %}
+                                    {% endif %}
+                                    {% if field.view_type|default(null) == 'date' %}
+                                        {% set value = value|app_date %}
+                                    {% endif %}
+                                    {% if field.view_type|default(null) == 'datetime' %}
+                                        {% set value = value|app_datetime %}
+                                    {% endif %}
+                                {% endif %}
+
+                                {{ value }}
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                    <td class="text-right">
+                        <a class="btn btn-primary btn-sm" href="{{ path(config.route('edit'), {id: item.id}) }}" title="Изменить">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include('default/_paginator.html.twig') with {'list_pagination': config.route('listPage')} %}
+{% endblock %}
